@@ -1,0 +1,22 @@
+version: "1"
+
+identity:
+  displayName: "User"
+  role: developer
+
+display:
+  theme: dark
+  density: comfortable
+  fontSize: 14
+  fontFamily: "Inter"
+
+defaults:
+  listView: table
+  detailView: split
+  pageSize: 25
+  dateFormat: relative
+
+interaction:
+  confirmDestructive: true
+  keyboardShortcutsEnabled: true
+  inlineEditing: true

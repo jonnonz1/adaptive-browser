@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "http:default",
+    "http:allow-fetch",
+    "http:allow-fetch-send",
+    "store:default",
+    "store:allow-get",
+    "store:allow-set",
+    "store:allow-save"
+  ]
+}

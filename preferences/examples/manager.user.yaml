@@ -1,0 +1,45 @@
+version: "1"
+
+identity:
+  displayName: "Sarah"
+  role: manager
+  timezone: "America/New_York"
+
+display:
+  theme: light
+  density: comfortable
+  fontSize: 15
+  fontFamily: "Inter"
+
+defaults:
+  listView: cards
+  detailView: full
+  pageSize: 25
+  dateFormat: locale
+
+interaction:
+  confirmDestructive: true
+  keyboardShortcutsEnabled: false
+  inlineEditing: false
+
+entities:
+  repository:
+    listView: cards
+    sortBy: stargazers_count
+    sortDirection: desc
+    visibleFields:
+      - name
+      - description
+      - language
+      - stargazers_count
+      - forks_count
+      - updated_at
+  issue:
+    listView: kanban
+    groupBy: assignee
+    visibleFields:
+      - title
+      - state
+      - assignee
+      - labels
+      - milestone

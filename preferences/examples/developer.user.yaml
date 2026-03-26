@@ -1,0 +1,53 @@
+version: "1"
+
+identity:
+  displayName: "Alex"
+  role: developer
+  timezone: "Europe/London"
+
+display:
+  theme: dark
+  density: compact
+  fontSize: 13
+  fontFamily: "JetBrains Mono"
+
+defaults:
+  listView: table
+  detailView: split
+  pageSize: 50
+  dateFormat: relative
+
+interaction:
+  confirmDestructive: false
+  keyboardShortcutsEnabled: true
+  inlineEditing: true
+
+entities:
+  repository:
+    listView: table
+    sortBy: pushed_at
+    sortDirection: desc
+    visibleFields:
+      - name
+      - description
+      - language
+      - stargazers_count
+      - updated_at
+      - open_issues_count
+  issue:
+    listView: table
+    sortBy: updated_at
+    sortDirection: desc
+    groupBy: state
+    visibleFields:
+      - title
+      - state
+      - assignee
+      - labels
+      - comments
+      - created_at
+
+services:
+  api.github.com:
+    defaults:
+      pageSize: 100

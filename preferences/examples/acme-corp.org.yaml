@@ -1,0 +1,53 @@
+version: "1"
+
+organization:
+  name: "Acme Corp"
+  id: "acme-corp"
+
+constraints:
+  display:
+    theme:
+      allowed: [light, dark]
+      default: light
+    density:
+      allowed: [compact, comfortable]
+      default: compact
+    fontSize:
+      min: 12
+      max: 18
+      default: 14
+
+  defaults:
+    listView:
+      allowed: [table, list]
+      default: table
+    confirmDestructive:
+      forced: true
+
+requiredFields:
+  repository:
+    - name
+    - owner
+    - private
+  issue:
+    - title
+    - state
+    - assignee
+
+defaults:
+  dateFormat: iso
+  pageSize: 50
+
+workflows:
+  - name: "Approval Required"
+    trigger: "issue.close"
+    condition:
+      labels: ["needs-approval"]
+    steps:
+      - action: require_confirmation
+        message: "This issue requires manager approval to close."
+
+allowedServices:
+  - domain: "api.github.com"
+    requiredScopes: ["repo", "read:org"]
+  - domain: "api.linear.app"

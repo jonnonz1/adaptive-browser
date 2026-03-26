@@ -1,0 +1,33 @@
+{
+  "name": "adaptive-browser",
+  "version": "0.1.0",
+  "description": "A browser that constructs bespoke UIs from API specs and user preferences",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "dependencies": {
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-http": "^2.5.7",
+    "@tauri-apps/plugin-store": "^2.4.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "yaml": "^2.8.3",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@tauri-apps/cli": "^2.10.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
+  }
+}

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+target/
+*.swp
+*.swo
+.DS_Store
+
+# Secrets / auth
+auth.json
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+
+# Tauri generated
+src-tauri/gen/
