@@ -2,7 +2,7 @@ mod commands;
 mod models;
 mod services;
 
-use commands::{api_fetch, auth, manifest, preferences};
+use commands::{api_fetch, auth, llm, manifest, preferences};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -31,6 +31,9 @@ pub fn run() {
             auth::get_token,
             preferences::get_merged_preferences,
             preferences::update_preference,
+            llm::call_llm,
+            llm::set_llm_config,
+            llm::has_llm_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

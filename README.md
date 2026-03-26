@@ -35,15 +35,15 @@ pnpm tauri build
 ```
 ├── src/                    # React frontend
 │   ├── components/shell/   # Browser chrome (address bar, sidebar, status bar)
-│   ├── components/adaptive/# OpenUI component library (coming soon)
+│   ├── components/adaptive/# OpenUI component library (DataTable, CardGrid, etc.)
 │   ├── stores/             # Zustand state (navigation, auth, preferences)
-│   └── lib/                # Types, utilities
+│   ├── hooks/              # useAdaptiveUI orchestration hook
+│   └── lib/                # Types, OpenUI library definition, prompt builder
 ├── src-tauri/              # Rust backend
-│   ├── src/commands/       # Tauri commands (API fetch, auth, manifest, prefs)
+│   ├── src/commands/       # Tauri commands (API fetch, auth, manifest, prefs, LLM)
 │   ├── src/models/         # Data models (UI manifest, preferences)
 │   └── src/services/       # Business logic (spec resolver, preference merger)
 ├── preferences/            # Default + example YAML preference files
-├── blog/                   # Development blog posts
 └── specs/                  # JSON Schemas for manifest + preference formats
 ```
 
@@ -60,9 +60,6 @@ Org preferences define guardrails. Users customize within those bounds.
 
 ### Supported Services (Phase 1)
 - **GitHub** (`api.github.com`) — Repositories, Issues, Pull Requests, Gists, Starred
-
-## Blog
-Development blog posts documenting the journey are in the `blog/` directory.
 
 ## License
 MIT

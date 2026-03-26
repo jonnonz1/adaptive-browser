@@ -5,6 +5,7 @@ import type { UiManifest, UiCapability, ServiceInfo } from "../lib/types";
 interface NavigationState {
   currentUrl: string;
   currentService: ServiceInfo | null;
+  manifest: UiManifest | null;
   capabilities: UiCapability[];
   activeCapability: string | null;
   apiData: unknown;
@@ -20,6 +21,7 @@ interface NavigationState {
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   currentUrl: "",
   currentService: null,
+  manifest: null,
   capabilities: [],
   activeCapability: null,
   apiData: null,
@@ -35,6 +37,7 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
       const manifest = await invoke<UiManifest>("resolve_manifest", { domain: cleanUrl });
       set({
         currentService: manifest.service,
+        manifest,
         capabilities: manifest.capabilities,
         activeCapability: manifest.capabilities[0]?.id || null,
         isLoading: false,

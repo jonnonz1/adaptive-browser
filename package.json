@@ -11,6 +11,9 @@
   },
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
+    "@openuidev/react-headless": "^0.7.10",
+    "@openuidev/react-lang": "^0.1.4",
+    "@openuidev/react-ui": "^0.9.20",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-http": "^2.5.7",
     "@tauri-apps/plugin-store": "^2.4.2",

@@ -13,5 +13,8 @@ auth.json
 *.key
 credentials.json
 
+# Blog (local only, published at jonno.nz)
+blog/
+
 # Tauri generated
 src-tauri/gen/
