@@ -14,7 +14,7 @@ pub async fn resolve_manifest(domain: &str) -> Result<UiManifest, Box<dyn std::e
     // let manifest: UiManifest = response.json().await?;
 
     Err(format!(
-        "No manifest found for '{}'. Currently only bundled manifests are supported (try: api.github.com)",
+        "No manifest found for '{}'. Try: api.github.com or demo.pulse.dev",
         domain
     ).into())
 }
@@ -22,7 +22,118 @@ pub async fn resolve_manifest(domain: &str) -> Result<UiManifest, Box<dyn std::e
 fn get_bundled_manifest(domain: &str) -> Option<UiManifest> {
     match domain {
         "api.github.com" => Some(github_manifest()),
+        "demo.pulse.dev" | "demo" | "pulse" => Some(demo_manifest()),
         _ => None,
+    }
+}
+
+fn demo_manifest() -> UiManifest {
+    UiManifest {
+        version: "1.0".into(),
+        service: ServiceInfo {
+            name: "Pulse Analytics".into(),
+            description: "SaaS analytics and observability platform".into(),
+            icon: None,
+            domain: "demo.pulse.dev".into(),
+            documentation: None,
+        },
+        openapi: None,
+        auth: None,
+        capabilities: vec![
+            UiCapability {
+                id: "overview".into(),
+                name: "Overview".into(),
+                description: "Platform health and key metrics dashboard".into(),
+                category: "analytics".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "dashboard/overview".into(),
+                    path: "/__demo__/overview".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "metric".into(),
+                    default_view: Some("dashboard".into()),
+                    alternate_views: None,
+                    sortable_fields: None,
+                    groupable_fields: None,
+                    searchable: None,
+                    primary_action: None,
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "engagement".into(),
+                name: "Engagement".into(),
+                description: "User engagement, retention, and feature adoption".into(),
+                category: "analytics".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "analytics/engagement".into(),
+                    path: "/__demo__/engagement".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "engagement".into(),
+                    default_view: Some("dashboard".into()),
+                    alternate_views: None,
+                    sortable_fields: None,
+                    groupable_fields: None,
+                    searchable: None,
+                    primary_action: None,
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "infrastructure".into(),
+                name: "Infrastructure".into(),
+                description: "Service health, deployments, and system status".into(),
+                category: "ops".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "ops/infrastructure".into(),
+                    path: "/__demo__/infrastructure".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "service".into(),
+                    default_view: Some("status".into()),
+                    alternate_views: None,
+                    sortable_fields: None,
+                    groupable_fields: None,
+                    searchable: None,
+                    primary_action: None,
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "revenue".into(),
+                name: "Revenue".into(),
+                description: "MRR, churn, and subscription analytics".into(),
+                category: "finance".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "finance/revenue".into(),
+                    path: "/__demo__/revenue".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "revenue".into(),
+                    default_view: Some("dashboard".into()),
+                    alternate_views: None,
+                    sortable_fields: None,
+                    groupable_fields: None,
+                    searchable: None,
+                    primary_action: None,
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+        ],
+        navigation: Some(NavigationConfig {
+            primary: vec!["overview".into(), "engagement".into(), "infrastructure".into()],
+            secondary: Some(vec!["revenue".into()]),
+        }),
+        branding: Some(BrandingConfig {
+            primary_color: Some("#8b5cf6".into()),
+            accent_color: Some("#d946ef".into()),
+            logo: None,
+        }),
     }
 }
 

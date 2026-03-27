@@ -7,6 +7,7 @@ import {
   extractDataShape,
 } from "../lib/prompt-context";
 import { useDebugStore } from "../stores/debug";
+import { DEMO_RESPONSES } from "../lib/demo-responses";
 import type { UiManifest, MergedPreferences } from "../lib/types";
 
 interface AdaptiveUIState {
@@ -55,6 +56,15 @@ export function useAdaptiveUI() {
         capability.endpoints.find((e) => e.semantic === "list") ??
         capability.endpoints[0];
       if (!endpoint) throw new Error("No endpoints found");
+
+      // Check for pre-baked demo responses (no LLM needed)
+      const demoResponse = DEMO_RESPONSES[capabilityId];
+      if (demoResponse && (domain === "demo.pulse.dev" || domain === "demo" || domain === "pulse")) {
+        addEvent("cache_hit", { domain, capabilityId, source: "demo", responseLength: demoResponse.length });
+        setLlmResponse(demoResponse);
+        setState({ response: demoResponse, isStreaming: false, error: null });
+        return;
+      }
 
       // Build cache key components
       const dataHash = simpleHash(JSON.stringify(apiData).slice(0, 2000));

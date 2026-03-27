@@ -33,6 +33,11 @@ pub async fn fetch_api_data(
         .or(capability.endpoints.first())
         .ok_or_else(|| format!("No endpoints found for capability '{}'", capability_id))?;
 
+    // Demo mode: return synthetic data
+    if domain == "demo.pulse.dev" || domain == "demo" || domain == "pulse" {
+        return Ok(crate::services::demo_data::get_demo_data(&capability_id));
+    }
+
     // Build the URL
     let url = format!("https://{}{}", domain, endpoint.path);
 

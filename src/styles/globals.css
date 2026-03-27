@@ -28,6 +28,20 @@
   --color-success: #22c55e;
   --color-warning: #eab308;
 
+  /* Vibrant palette for data visualization */
+  --color-violet: #8b5cf6;
+  --color-fuchsia: #d946ef;
+  --color-rose: #f43f5e;
+  --color-orange: #f97316;
+  --color-amber: #f59e0b;
+  --color-lime: #84cc16;
+  --color-emerald: #10b981;
+  --color-teal: #14b8a6;
+  --color-cyan: #06b6d4;
+  --color-sky: #0ea5e9;
+  --color-indigo: #6366f1;
+  --color-pink: #ec4899;
+
   --color-border: #222226;
   --color-input: #222226;
   --color-ring: #3b82f6;

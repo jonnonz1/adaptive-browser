@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Renderer } from "@openuidev/react-lang";
 import { Layers, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
+import { cn } from "../../lib/utils";
 import { useNavigationStore } from "../../stores/navigation";
 import { usePreferencesStore } from "../../stores/preferences";
 import { useDebugStore } from "../../stores/debug";
@@ -66,22 +67,27 @@ function Welcome() {
         </p>
 
         <div className="mt-8 space-y-2 text-left">
+          <SvcCard domain="demo.pulse.dev" desc="Analytics dashboard demo — no API key needed!" ready featured />
           <SvcCard domain="api.github.com" desc="Repositories, issues, pull requests" ready />
           <SvcCard domain="api.stripe.com" desc="Billing, subscriptions, payments" />
           <SvcCard domain="api.linear.app" desc="Issues, projects, cycles" />
         </div>
 
         <p className="mt-8 text-xs text-muted-foreground">
-          Set your GitHub PAT and LLM key via the status bar to get started.
+          Try <code className="rounded bg-muted px-1 py-0.5 text-primary">demo.pulse.dev</code> for an instant demo, or set your GitHub PAT and LLM key via the status bar.
         </p>
       </div>
     </div>
   );
 }
 
-function SvcCard({ domain, desc, ready }: { domain: string; desc: string; ready?: boolean }) {
+function SvcCard({ domain, desc, ready, featured }: { domain: string; desc: string; ready?: boolean; featured?: boolean }) {
   return (
-    <div className={`flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 transition-colors ${ready ? "hover:border-primary/30" : "opacity-40"}`}>
+    <div className={cn(
+      "flex items-center justify-between rounded-xl border bg-card px-4 py-3 transition-colors",
+      featured ? "border-violet/30 hover:border-violet/50 ring-1 ring-violet/10" :
+      ready ? "border-border hover:border-primary/30" : "border-border opacity-40"
+    )}>
       <div className="flex items-center gap-3">
         <ExternalLink className="h-4 w-4 text-muted-foreground" />
         <div>
@@ -89,8 +95,12 @@ function SvcCard({ domain, desc, ready }: { domain: string; desc: string; ready?
           <p className="text-xs text-muted-foreground">{desc}</p>
         </div>
       </div>
-      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${ready ? "bg-success/10 text-success" : "bg-secondary text-muted-foreground"}`}>
-        {ready ? "Ready" : "Soon"}
+      <span className={cn(
+        "rounded-full px-2 py-0.5 text-[10px] font-medium",
+        featured ? "bg-violet/15 text-violet" :
+        ready ? "bg-success/10 text-success" : "bg-secondary text-muted-foreground"
+      )}>
+        {featured ? "Demo" : ready ? "Ready" : "Soon"}
       </span>
     </div>
   );
