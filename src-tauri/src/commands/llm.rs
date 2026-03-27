@@ -35,7 +35,7 @@ async fn call_anthropic(
 
     let body = serde_json::json!({
         "model": "claude-sonnet-4-20250514",
-        "max_tokens": 4096,
+        "max_tokens": 8192,
         "system": system_prompt,
         "messages": [
             {

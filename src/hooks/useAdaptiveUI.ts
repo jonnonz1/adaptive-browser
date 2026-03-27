@@ -105,18 +105,15 @@ export function useAdaptiveUI() {
 
       const systemPrompt = buildFullSystemPrompt(adaptiveLibrary.prompt());
 
-      const dataSlice = Array.isArray(apiData)
-        ? (apiData as unknown[]).slice(0, 25)
-        : apiData;
+      // Clean the data: strip URL fields and noise, flatten nested objects, limit size
+      const cleanedData = cleanDataForPrompt(apiData);
 
       const userMessage = `${contextMessage}
 
-## Actual Data (use this to populate the UI)
-\`\`\`json
-${JSON.stringify(dataSlice, null, 2)}
-\`\`\`
+## Actual Data — Use These Real Values
+${JSON.stringify(cleanedData, null, 2)}
 
-Generate the UI now using OpenUI Lang.`;
+Now generate OpenUI Lang. Use MetricGrid at the top with colorful summary stats derived from this data. Then render the main view (${dataShape.totalItems > 1 ? "DataTable or CardGrid" : "DetailView"}) populated with the actual values above. Use vibrant, varied colors.`;
 
       // Store prompt info for debug panel
       setPromptInfo(systemPrompt, userMessage);
@@ -142,7 +139,13 @@ Generate the UI now using OpenUI Lang.`;
         capabilityId,
       }, duration);
 
-      setLlmResponse(llmResponse);
+      // Strip markdown code fences if the LLM wraps output in ```
+      const cleanedResponse = llmResponse
+        .replace(/^```[\w]*\n?/gm, "")
+        .replace(/\n?```$/gm, "")
+        .trim();
+
+      setLlmResponse(cleanedResponse);
 
       // Cache the response
       await invoke("store_cache", {
@@ -150,7 +153,7 @@ Generate the UI now using OpenUI Lang.`;
         capabilityId,
         dataHash,
         prefsHash,
-        response: llmResponse,
+        response: cleanedResponse,
       });
       addEvent("cache_store", { domain, capabilityId });
 
@@ -159,7 +162,7 @@ Generate the UI now using OpenUI Lang.`;
       setCacheStats({ entryCount: stats.entry_count, totalHits: stats.total_hits, maxEntries: stats.max_entries });
 
       const renderStart = performance.now();
-      setState({ response: llmResponse, isStreaming: false, error: null });
+      setState({ response: cleanedResponse, isStreaming: false, error: null });
       addEvent("render_complete", { capabilityId }, Math.round(performance.now() - renderStart));
 
     } catch (err) {
@@ -178,4 +181,53 @@ Generate the UI now using OpenUI Lang.`;
     generate,
     library: adaptiveLibrary,
   };
+}
+
+/**
+ * Clean API data for the LLM prompt: strip URL noise, flatten nested objects,
+ * limit to 20 items, truncate long strings. This dramatically reduces token
+ * usage and helps the LLM focus on the actual content.
+ */
+function cleanDataForPrompt(data: unknown): unknown {
+  if (Array.isArray(data)) {
+    return data.slice(0, 20).map((item) =>
+      typeof item === "object" && item !== null ? cleanObject(item as Record<string, unknown>) : item
+    );
+  }
+  if (data && typeof data === "object") {
+    return cleanObject(data as Record<string, unknown>);
+  }
+  return data;
+}
+
+function cleanObject(obj: Record<string, unknown>): Record<string, unknown> {
+  const clean: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    // Skip URL fields and internal IDs — pure noise for UI generation
+    if (key.endsWith("_url") || key === "url" || key === "node_id" || key === "gravatar_id") continue;
+    if (key === "permissions" || key === "plan") continue; // GitHub noise
+
+    if (value === null || value === undefined) {
+      clean[key] = null;
+    } else if (typeof value === "string") {
+      clean[key] = value.length > 100 ? value.slice(0, 100) + "..." : value;
+    } else if (typeof value === "number" || typeof value === "boolean") {
+      clean[key] = value;
+    } else if (typeof value === "object" && !Array.isArray(value)) {
+      // Flatten nested objects to their display value
+      const nested = value as Record<string, unknown>;
+      clean[key] = nested.login ?? nested.name ?? nested.title ?? nested.label ?? `{object}`;
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        clean[key] = [];
+      } else if (typeof value[0] === "object" && value[0] !== null) {
+        // Array of objects — extract names/labels
+        const items = value as Record<string, unknown>[];
+        clean[key] = items.slice(0, 5).map((v) => v.name ?? v.login ?? v.title ?? v.label ?? "{item}");
+      } else {
+        clean[key] = value.slice(0, 5);
+      }
+    }
+  }
+  return clean;
 }
