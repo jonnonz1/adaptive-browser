@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from "react";
+import { X, Key } from "lucide-react";
 import { useAuthStore } from "../../stores/auth";
 
 export function AuthDialog() {
@@ -21,24 +22,23 @@ export function AuthDialog() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
-      <div
-        className="w-full max-w-md rounded-xl p-6"
-        style={{
-          backgroundColor: "var(--bg-secondary)",
-          border: "1px solid var(--border)",
-          boxShadow: "var(--shadow-lg)",
-        }}
-      >
-        <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-          API Authentication
-        </h2>
-        <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-in">
+      <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl animate-in">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Key className="h-4 w-4 text-primary" />
+            <h2 className="text-base font-semibold text-foreground">API Authentication</h2>
+          </div>
+          <button onClick={hideAuthDialog} className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <p className="mb-4 text-sm text-muted-foreground">
           Enter a Personal Access Token for the current service.
-          {isAuthenticated && (
-            <span className="ml-1" style={{ color: "var(--success)" }}>(Currently authenticated)</span>
-          )}
+          {isAuthenticated && <span className="ml-1 text-success">(active)</span>}
         </p>
+
         <input
           type="password"
           value={tokenInput}
@@ -46,25 +46,19 @@ export function AuthDialog() {
           onKeyDown={handleKeyDown}
           placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
           autoFocus
-          className="mt-4 w-full rounded-lg px-3 py-2 text-sm outline-none"
-          style={{
-            backgroundColor: "var(--bg-tertiary)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border)",
-          }}
+          className="w-full rounded-lg border border-input bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
         />
+
         <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={hideAuthDialog}
-            className="rounded-lg px-4 py-2 text-sm transition-colors hover:opacity-80"
-            style={{ color: "var(--text-muted)" }}
+            className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="rounded-lg px-4 py-2 text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
-            style={{ backgroundColor: "var(--accent)", color: "var(--text-inverse)" }}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98]"
           >
             Save Token
           </button>

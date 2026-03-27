@@ -1,6 +1,8 @@
+import { Bug, Settings, Shield, ShieldCheck, Database } from "lucide-react";
 import { useAuthStore } from "../../stores/auth";
 import { useSettingsStore } from "../../stores/settings";
 import { useDebugStore } from "../../stores/debug";
+import { cn } from "../../lib/utils";
 
 interface Props {
   serviceName?: string;
@@ -14,71 +16,64 @@ export function StatusBar({ serviceName }: Props) {
   const cacheStats = useDebugStore((s) => s.cacheStats);
 
   return (
-    <div
-      className="flex items-center justify-between px-4 py-1.5 text-xs"
-      style={{
-        backgroundColor: "var(--bg-secondary)",
-        borderTop: "1px solid var(--border-subtle)",
-        color: "var(--text-muted)",
-      }}
-    >
+    <div className="flex items-center justify-between border-t border-border bg-card px-3 py-1 text-xs text-muted-foreground">
       <div className="flex items-center gap-4">
         {serviceName ? (
-          <span>
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--success)" }} />
-            <span style={{ color: "var(--text-secondary)" }}>{serviceName}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="text-foreground">{serviceName}</span>
           </span>
         ) : (
           <span>No service</span>
         )}
-        {cacheStats && (
-          <span>
-            Cache: {cacheStats.entryCount} entries, {cacheStats.totalHits} hits
+        {cacheStats && cacheStats.entryCount > 0 && (
+          <span className="flex items-center gap-1">
+            <Database className="h-3 w-3" />
+            {cacheStats.entryCount} cached / {cacheStats.totalHits} hits
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-1">
-        <StatusButton
-          onClick={toggleDebug}
-          active={debugOpen}
-          label="Debug"
-        />
-        <StatusButton
-          onClick={openSettings}
-          label="Settings"
-        />
-        <StatusButton
+      <div className="flex items-center gap-0.5">
+        <BarButton onClick={toggleDebug} active={debugOpen} icon={<Bug className="h-3 w-3" />} label="Debug" />
+        <BarButton onClick={openSettings} icon={<Settings className="h-3 w-3" />} label="Settings" />
+        <BarButton
           onClick={showAuthDialog}
+          icon={isAuthenticated ? <ShieldCheck className="h-3 w-3" /> : <Shield className="h-3 w-3" />}
           label={isAuthenticated ? "Authenticated" : "Set Token"}
-          color={isAuthenticated ? "var(--success)" : "var(--warning)"}
+          variant={isAuthenticated ? "success" : "warning"}
         />
-        <span className="ml-2" style={{ color: "var(--text-muted)" }}>v0.1.0</span>
+        <span className="ml-2 text-muted-foreground/50">v0.1</span>
       </div>
     </div>
   );
 }
 
-function StatusButton({
+function BarButton({
   onClick,
+  icon,
   label,
-  color,
   active,
+  variant,
 }: {
   onClick: () => void;
+  icon: React.ReactNode;
   label: string;
-  color?: string;
   active?: boolean;
+  variant?: "success" | "warning";
 }) {
   return (
     <button
       onClick={onClick}
-      className="rounded px-2 py-0.5 text-xs transition-colors hover:opacity-80"
-      style={{
-        color: color ?? (active ? "var(--accent)" : "var(--text-secondary)"),
-        backgroundColor: active ? "var(--bg-active)" : "transparent",
-      }}
+      className={cn(
+        "inline-flex items-center gap-1 rounded px-2 py-0.5 transition-colors hover:bg-accent",
+        active && "bg-accent text-primary",
+        variant === "success" && "text-success",
+        variant === "warning" && "text-warning",
+        !active && !variant && "text-muted-foreground hover:text-foreground"
+      )}
     >
+      {icon}
       {label}
     </button>
   );

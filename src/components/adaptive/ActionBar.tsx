@@ -1,50 +1,32 @@
 import type { ComponentRenderProps } from "@openuidev/react-lang";
 import { useTriggerAction } from "@openuidev/react-lang";
+import { cn } from "../../lib/utils";
 
-interface ActionDef {
-  label: string;
-  variant?: "primary" | "secondary" | "danger";
-  confirmMessage?: string;
-}
-
-interface ActionBarProps {
-  actions: ActionDef[];
-}
+interface ActionDef { label: string; variant?: "primary" | "secondary" | "danger"; confirmMessage?: string; }
+interface ActionBarProps { actions: ActionDef[]; }
 
 export function ActionBarComponent({ props }: ComponentRenderProps<ActionBarProps>) {
   const triggerAction = useTriggerAction();
-  const { actions } = props;
 
-  const handleClick = (action: ActionDef) => {
-    if (action.confirmMessage && !window.confirm(action.confirmMessage)) {
-      return;
-    }
-    triggerAction(action.label, undefined, {
-      type: action.label.toLowerCase().replace(/\s+/g, "_"),
-    });
+  const handleClick = (a: ActionDef) => {
+    if (a.confirmMessage && !window.confirm(a.confirmMessage)) return;
+    triggerAction(a.label, undefined, { type: a.label.toLowerCase().replace(/\s+/g, "_") });
   };
 
   return (
     <div className="flex gap-2">
-      {actions?.map((action, i) => (
+      {props.actions?.map((a, i) => (
         <button
           key={i}
-          onClick={() => handleClick(action)}
-          className="rounded px-4 py-2 text-sm font-medium transition-colors"
-          style={{
-            backgroundColor:
-              action.variant === "danger"
-                ? "var(--color-danger)"
-                : action.variant === "primary"
-                ? "var(--color-accent)"
-                : "var(--color-bg-tertiary)",
-            color:
-              action.variant === "secondary"
-                ? "var(--color-text-primary)"
-                : "var(--color-bg-primary)",
-          }}
+          onClick={() => handleClick(a)}
+          className={cn(
+            "rounded-lg px-4 py-2 text-sm font-medium transition-colors active:scale-[0.98]",
+            a.variant === "danger" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              : a.variant === "primary" ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+              : "bg-secondary text-foreground hover:bg-accent"
+          )}
         >
-          {action.label}
+          {a.label}
         </button>
       ))}
     </div>

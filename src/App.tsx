@@ -13,17 +13,15 @@ export default function App() {
   const debugOpen = useDebugStore((s) => s.isOpen);
 
   return (
-    <div className="flex h-full flex-col" style={{ backgroundColor: "var(--bg-primary)" }}>
+    <div className="flex h-full flex-col bg-background text-foreground">
       <AddressBar />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1">
         <NavigationSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
-        <main className="relative flex-1 overflow-auto">
-          <div className="h-full p-5">
-            <ContentArea />
-          </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          <ContentArea />
         </main>
         {debugOpen && <DebugPanel />}
       </div>

@@ -1,48 +1,30 @@
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { ComponentRenderProps } from "@openuidev/react-lang";
+import { cn } from "../../lib/utils";
 
 interface StatCardProps {
-  label: string;
-  value: string;
-  change?: string;
-  changeDirection?: "up" | "down" | "neutral";
-  description?: string;
+  label: string; value: string; change?: string;
+  changeDirection?: "up" | "down" | "neutral"; description?: string;
 }
 
 export function StatCardComponent({ props }: ComponentRenderProps<StatCardProps>) {
   const { label, value, change, changeDirection, description } = props;
-
-  const changeColor =
-    changeDirection === "up"
-      ? "var(--color-success)"
-      : changeDirection === "down"
-      ? "var(--color-danger)"
-      : "var(--color-text-secondary)";
+  const Icon = changeDirection === "up" ? TrendingUp : changeDirection === "down" ? TrendingDown : Minus;
 
   return (
-    <div
-      className="rounded-lg p-4"
-      style={{
-        backgroundColor: "var(--color-bg-secondary)",
-        border: "1px solid var(--color-border)",
-      }}
-    >
-      <p className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-bold" style={{ color: "var(--color-text-primary)" }}>
-        {value}
-      </p>
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{value}</p>
       {change && (
-        <p className="mt-1 text-xs" style={{ color: changeColor }}>
-          {changeDirection === "up" ? "+" : changeDirection === "down" ? "" : ""}
+        <p className={cn(
+          "mt-1 inline-flex items-center gap-1 text-xs font-medium",
+          changeDirection === "up" ? "text-success" : changeDirection === "down" ? "text-destructive" : "text-muted-foreground"
+        )}>
+          <Icon className="h-3 w-3" />
           {change}
         </p>
       )}
-      {description && (
-        <p className="mt-1 text-xs" style={{ color: "var(--color-text-secondary)" }}>
-          {description}
-        </p>
-      )}
+      {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
     </div>
   );
 }

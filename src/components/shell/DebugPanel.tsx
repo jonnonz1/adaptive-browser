@@ -1,150 +1,80 @@
-import { useDebugStore, type DebugEvent } from "../../stores/debug";
+import { X, Trash2 } from "lucide-react";
+import { useDebugStore, type DebugEvent, type DebugEventType } from "../../stores/debug";
+import { cn } from "../../lib/utils";
+
+const TABS = [
+  { id: "events" as const, label: "Events" },
+  { id: "prompt" as const, label: "Prompt" },
+  { id: "cache" as const, label: "Cache" },
+  { id: "performance" as const, label: "Perf" },
+] as const;
 
 export function DebugPanel() {
-  const { events, activeTab, setTab, close, clearEvents } = useDebugStore();
-  const { lastSystemPrompt, lastUserMessage, lastLlmResponse, lastTokenUsage, cacheStats } =
-    useDebugStore();
-
-  const tabs = [
-    { id: "events" as const, label: "Events" },
-    { id: "prompt" as const, label: "Prompt" },
-    { id: "cache" as const, label: "Cache" },
-    { id: "performance" as const, label: "Perf" },
-  ];
+  const { events, activeTab, setTab, close, clearEvents,
+    lastSystemPrompt, lastUserMessage, lastLlmResponse, lastTokenUsage, cacheStats } = useDebugStore();
 
   return (
-    <div
-      className="flex h-full flex-col animate-slide-in-right"
-      style={{
-        width: 420,
-        backgroundColor: "var(--bg-secondary)",
-        borderLeft: "1px solid var(--border)",
-      }}
-    >
+    <div className="flex h-full w-[400px] flex-col border-l border-border bg-card animate-slide-right">
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-2.5"
-        style={{ borderBottom: "1px solid var(--border-subtle)" }}
-      >
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            Debug
-          </span>
-          <span
-            className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-            style={{ backgroundColor: "var(--bg-active)", color: "var(--text-muted)" }}
-          >
-            {events.length}
-          </span>
+          <span className="text-sm font-semibold text-foreground">Debug</span>
+          <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">{events.length}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={clearEvents}
-            className="rounded px-2 py-1 text-xs transition-colors hover:opacity-80"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Clear
-          </button>
-          <button
-            onClick={close}
-            className="rounded px-2 py-1 text-xs transition-colors hover:opacity-80"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Close
-          </button>
+        <div className="flex items-center gap-0.5">
+          <button onClick={clearEvents} className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground" title="Clear"><Trash2 className="h-3.5 w-3.5" /></button>
+          <button onClick={close} className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground" title="Close"><X className="h-3.5 w-3.5" /></button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div
-        className="flex gap-0 px-2"
-        style={{ borderBottom: "1px solid var(--border-subtle)" }}
-      >
-        {tabs.map((tab) => (
+      <div className="flex border-b border-border">
+        {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setTab(tab.id)}
-            className="relative px-3 py-2 text-xs font-medium transition-colors"
-            style={{
-              color: activeTab === tab.id ? "var(--accent)" : "var(--text-muted)",
-            }}
+            className={cn(
+              "relative flex-1 py-2 text-xs font-medium transition-colors",
+              activeTab === tab.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
           >
             {tab.label}
-            {activeTab === tab.id && (
-              <div
-                className="absolute right-3 bottom-0 left-3 h-[2px] rounded-full"
-                style={{ backgroundColor: "var(--accent)" }}
-              />
-            )}
+            {activeTab === tab.id && <div className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary" />}
           </button>
         ))}
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === "events" && <EventsTab events={events} />}
-        {activeTab === "prompt" && (
-          <PromptTab
-            system={lastSystemPrompt}
-            user={lastUserMessage}
-            response={lastLlmResponse}
-            tokens={lastTokenUsage}
-          />
-        )}
-        {activeTab === "cache" && <CacheTab stats={cacheStats} />}
-        {activeTab === "performance" && <PerformanceTab events={events} />}
+        {activeTab === "events" && <EventsView events={events} />}
+        {activeTab === "prompt" && <PromptView system={lastSystemPrompt} user={lastUserMessage} response={lastLlmResponse} tokens={lastTokenUsage} />}
+        {activeTab === "cache" && <CacheView stats={cacheStats} />}
+        {activeTab === "performance" && <PerfView events={events} />}
       </div>
     </div>
   );
 }
 
-function EventsTab({ events }: { events: DebugEvent[] }) {
-  if (events.length === 0) {
-    return (
-      <div className="flex h-32 items-center justify-center">
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          No events yet. Navigate to an API to see activity.
-        </p>
-      </div>
-    );
-  }
-
+// --- Events ---
+function EventsView({ events }: { events: DebugEvent[] }) {
+  if (!events.length) return <Empty>Navigate to an API to see events</Empty>;
   return (
-    <div className="space-y-0">
-      {events.map((evt) => (
-        <div
-          key={evt.id}
-          className="border-b px-4 py-2.5 animate-fade-in"
-          style={{ borderColor: "var(--border-subtle)" }}
-        >
+    <div>
+      {events.map((e) => (
+        <div key={e.id} className="border-b border-border px-4 py-2.5 animate-in">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <EventBadge type={evt.type} />
-              <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>
-                {formatEventType(evt.type)}
-              </span>
+              <Dot type={e.type} />
+              <span className="text-xs font-medium text-foreground">{fmtType(e.type)}</span>
             </div>
-            <div className="flex items-center gap-2">
-              {evt.duration !== undefined && (
-                <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-                  {evt.duration}ms
-                </span>
-              )}
-              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                {new Date(evt.timestamp).toLocaleTimeString()}
-              </span>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+              {e.duration != null && <span className="font-mono">{e.duration}ms</span>}
+              <span>{new Date(e.timestamp).toLocaleTimeString()}</span>
             </div>
           </div>
-          {Object.keys(evt.data).length > 0 && (
-            <pre
-              className="mt-1.5 overflow-x-auto rounded px-2 py-1.5 text-[10px] leading-relaxed"
-              style={{
-                backgroundColor: "var(--bg-tertiary)",
-                color: "var(--text-secondary)",
-                maxHeight: 120,
-              }}
-            >
-              {JSON.stringify(evt.data, null, 2)}
+          {Object.keys(e.data).length > 0 && (
+            <pre className="mt-1.5 max-h-28 overflow-auto rounded-md bg-muted p-2 text-[10px] leading-relaxed text-muted-foreground">
+              {JSON.stringify(e.data, null, 2)}
             </pre>
           )}
         </div>
@@ -153,185 +83,102 @@ function EventsTab({ events }: { events: DebugEvent[] }) {
   );
 }
 
-function PromptTab({
-  system,
-  user,
-  response,
-  tokens,
-}: {
-  system: string | null;
-  user: string | null;
-  response: string | null;
+// --- Prompt ---
+function PromptView({ system, user, response, tokens }: {
+  system: string | null; user: string | null; response: string | null;
   tokens: { input: number; output: number } | null;
 }) {
-  if (!system && !user) {
-    return (
-      <div className="flex h-32 items-center justify-center">
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          No LLM calls yet.
-        </p>
-      </div>
-    );
-  }
-
+  if (!system && !user) return <Empty>No LLM calls yet</Empty>;
   return (
     <div className="space-y-4 p-4">
       {tokens && (
-        <div
-          className="flex gap-4 rounded-lg p-3"
-          style={{ backgroundColor: "var(--bg-tertiary)" }}
-        >
-          <div>
-            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Input</div>
-            <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              {tokens.input.toLocaleString()} tokens
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Output</div>
-            <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              {tokens.output.toLocaleString()} tokens
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Est. Cost</div>
-            <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              ${((tokens.input * 0.003 + tokens.output * 0.015) / 1000).toFixed(4)}
-            </div>
-          </div>
+        <div className="grid grid-cols-3 gap-2">
+          <Stat label="Input" value={`${tokens.input.toLocaleString()}`} sub="tokens" />
+          <Stat label="Output" value={`${tokens.output.toLocaleString()}`} sub="tokens" />
+          <Stat label="Cost" value={`$${((tokens.input * 0.003 + tokens.output * 0.015) / 1000).toFixed(4)}`} sub="est." />
         </div>
       )}
-
-      <PromptSection title="System Prompt" content={system} />
-      <PromptSection title="User Message" content={user} />
-      <PromptSection title="LLM Response (OpenUI Lang)" content={response} />
+      <PromptBlock title="System Prompt" text={system} />
+      <PromptBlock title="User Message" text={user} />
+      <PromptBlock title="LLM Response" text={response} />
     </div>
   );
 }
 
-function PromptSection({ title, content }: { title: string; content: string | null }) {
-  if (!content) return null;
-
-  return (
-    <div>
-      <h4 className="mb-1.5 text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-        {title}
-      </h4>
-      <pre
-        className="overflow-auto rounded-lg p-3 text-[11px] leading-relaxed"
-        style={{
-          backgroundColor: "var(--bg-tertiary)",
-          color: "var(--text-secondary)",
-          maxHeight: 300,
-          border: "1px solid var(--border-subtle)",
-        }}
-      >
-        {content}
-      </pre>
-    </div>
-  );
-}
-
-function CacheTab({
-  stats,
-}: {
-  stats: { entryCount: number; totalHits: number; maxEntries: number } | null;
-}) {
+// --- Cache ---
+function CacheView({ stats }: { stats: { entryCount: number; totalHits: number; maxEntries: number } | null }) {
   return (
     <div className="p-4">
-      <div className="grid grid-cols-3 gap-3">
-        <StatBox label="Entries" value={stats?.entryCount ?? 0} />
-        <StatBox label="Hits" value={stats?.totalHits ?? 0} />
-        <StatBox label="Max" value={stats?.maxEntries ?? 100} />
+      <div className="grid grid-cols-3 gap-2">
+        <Stat label="Entries" value={stats?.entryCount ?? 0} />
+        <Stat label="Hits" value={stats?.totalHits ?? 0} />
+        <Stat label="Capacity" value={stats?.maxEntries ?? 100} />
       </div>
-      <p className="mt-4 text-xs" style={{ color: "var(--text-muted)" }}>
-        UI responses are cached for 30 minutes, keyed by endpoint + data shape + preference hash.
-        Cache prevents redundant LLM calls when navigating between previously viewed capabilities.
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+        Generated UIs are cached for 30 min keyed by endpoint + data shape + preference hash.
       </p>
     </div>
   );
 }
 
-function PerformanceTab({ events }: { events: DebugEvent[] }) {
-  const llmEvents = events.filter((e) => e.type === "llm_response" && e.duration);
-  const apiEvents = events.filter((e) => e.type === "api_fetch" && e.duration);
-  const renderEvents = events.filter((e) => e.type === "render_complete" && e.duration);
-
-  const avg = (evts: DebugEvent[]) => {
-    if (evts.length === 0) return 0;
-    return Math.round(evts.reduce((sum, e) => sum + (e.duration ?? 0), 0) / evts.length);
+// --- Performance ---
+function PerfView({ events }: { events: DebugEvent[] }) {
+  const avg = (type: string) => {
+    const e = events.filter((x) => x.type === type && x.duration != null);
+    return e.length ? Math.round(e.reduce((s, x) => s + (x.duration ?? 0), 0) / e.length) : 0;
   };
 
   return (
     <div className="p-4">
-      <div className="grid grid-cols-3 gap-3">
-        <StatBox label="Avg LLM" value={`${avg(llmEvents)}ms`} />
-        <StatBox label="Avg API" value={`${avg(apiEvents)}ms`} />
-        <StatBox label="Avg Render" value={`${avg(renderEvents)}ms`} />
+      <div className="grid grid-cols-3 gap-2">
+        <Stat label="LLM" value={`${avg("llm_response")}ms`} />
+        <Stat label="API" value={`${avg("api_fetch")}ms`} />
+        <Stat label="Render" value={`${avg("render_complete")}ms`} />
       </div>
-      <div className="mt-4 space-y-2">
-        <h4 className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-          Recent Timings
-        </h4>
-        {events
-          .filter((e) => e.duration)
-          .slice(0, 20)
-          .map((evt) => (
-            <div
-              key={evt.id}
-              className="flex items-center justify-between text-xs"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <span>{formatEventType(evt.type)}</span>
-              <span className="font-mono" style={{ color: "var(--text-primary)" }}>
-                {evt.duration}ms
-              </span>
-            </div>
-          ))}
+      <div className="mt-4 space-y-1">
+        <h4 className="mb-2 text-xs font-semibold text-muted-foreground">Recent</h4>
+        {events.filter((e) => e.duration != null).slice(0, 15).map((e) => (
+          <div key={e.id} className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">{fmtType(e.type)}</span>
+            <span className="font-mono text-foreground">{e.duration}ms</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function StatBox({ label, value }: { label: string; value: number | string }) {
+// --- Shared ---
+function Empty({ children }: { children: React.ReactNode }) {
+  return <div className="flex h-32 items-center justify-center text-xs text-muted-foreground">{children}</div>;
+}
+
+function Stat({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
-    <div
-      className="rounded-lg p-3 text-center"
-      style={{ backgroundColor: "var(--bg-tertiary)" }}
-    >
-      <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-        {label}
-      </div>
-      <div className="mt-0.5 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-        {value}
-      </div>
+    <div className="rounded-lg bg-muted p-2.5 text-center">
+      <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-base font-bold text-foreground">{value}</div>
+      {sub && <div className="text-[10px] text-muted-foreground">{sub}</div>}
     </div>
   );
 }
 
-function EventBadge({ type }: { type: string }) {
-  const colors: Record<string, string> = {
-    cache_hit: "var(--success)",
-    cache_miss: "var(--warning)",
-    llm_request: "var(--accent)",
-    llm_response: "var(--accent)",
-    llm_error: "var(--danger)",
-    api_fetch: "var(--text-secondary)",
-    render_complete: "var(--success)",
-    manifest_resolve: "var(--text-muted)",
+function PromptBlock({ title, text }: { title: string; text: string | null }) {
+  if (!text) return null;
+  return (
+    <div>
+      <h4 className="mb-1 text-xs font-semibold text-muted-foreground">{title}</h4>
+      <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-background p-3 text-[11px] leading-relaxed text-muted-foreground">{text}</pre>
+    </div>
+  );
+}
+
+function Dot({ type }: { type: DebugEventType }) {
+  const c: Record<string, string> = {
+    cache_hit: "bg-success", cache_miss: "bg-warning", llm_request: "bg-primary",
+    llm_response: "bg-primary", llm_error: "bg-destructive", render_complete: "bg-success",
   };
-
-  return (
-    <div
-      className="h-2 w-2 rounded-full"
-      style={{ backgroundColor: colors[type] ?? "var(--text-muted)" }}
-    />
-  );
+  return <div className={cn("h-2 w-2 rounded-full", c[type] ?? "bg-muted-foreground")} />;
 }
 
-function formatEventType(type: string): string {
-  return type
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
+function fmtType(t: string) { return t.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" "); }
