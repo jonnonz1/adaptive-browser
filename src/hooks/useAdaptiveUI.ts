@@ -8,6 +8,7 @@ import {
 } from "../lib/prompt-context";
 import { useDebugStore } from "../stores/debug";
 import { DEMO_RESPONSES } from "../lib/demo-responses";
+import { generateUI } from "../lib/ui-generator";
 import type { UiManifest, MergedPreferences } from "../lib/types";
 
 interface AdaptiveUIState {
@@ -92,9 +93,34 @@ export function useAdaptiveUI() {
 
       addEvent("cache_miss", { domain, capabilityId });
 
+      // ── Strategy 1: Deterministic UI generator (instant, no LLM needed) ──
+      const generatedUI = generateUI({
+        capability,
+        endpoint,
+        preferences,
+        data: apiData,
+        serviceName: manifest.service.name,
+      });
+
+      if (generatedUI) {
+        const genStart = performance.now();
+        const genDuration = Math.round(performance.now() - genStart);
+        addEvent("render_complete", { source: "generator", capabilityId, responseLength: generatedUI.length }, genDuration);
+        setLlmResponse(generatedUI, undefined);
+        setPromptInfo("(deterministic generator — no LLM used)", `Entity: ${endpoint.entity}\nSemantic: ${endpoint.semantic}\nView: ${preferences.entities?.[endpoint.entity]?.listView ?? preferences.defaults?.listView ?? endpoint.defaultView ?? "table"}\nItems: ${Array.isArray(apiData) ? (apiData as unknown[]).length : 1}`);
+
+        // Cache the deterministic result too
+        await invoke("store_cache", { domain, capabilityId, dataHash, prefsHash, response: generatedUI });
+        const stats = await invoke<{ entry_count: number; total_hits: number; max_entries: number }>("get_cache_stats");
+        setCacheStats({ entryCount: stats.entry_count, totalHits: stats.total_hits, maxEntries: stats.max_entries });
+
+        setState({ response: generatedUI, isStreaming: false, error: null });
+        return;
+      }
+
+      // ── Strategy 2: LLM generation (richer but requires API key) ──
       const dataShape = extractDataShape(apiData);
 
-      // Build the context message
       const contextMessage = buildPromptContext({
         capability,
         endpoint,
@@ -118,7 +144,6 @@ ${JSON.stringify(dataSlice, null, 2)}
 
 Generate the UI now using OpenUI Lang.`;
 
-      // Store prompt info for debug panel
       setPromptInfo(systemPrompt, userMessage);
       addEvent("llm_request", {
         provider: "configured",
@@ -128,7 +153,6 @@ Generate the UI now using OpenUI Lang.`;
 
       const startTime = performance.now();
 
-      // Call LLM
       const llmResponse = await invoke<string>("call_llm", {
         systemPrompt,
         userMessage,
