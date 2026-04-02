@@ -10,6 +10,28 @@ Instead of servers dictating what you see, **your browser constructs the interfa
 Server exposes APIs → Browser understands them → Your preferences shape UI → Browser constructs it
 ```
 
+## Screenshots
+
+### Landing Page
+The home screen lists available API services and their connection status.
+
+![Landing Page](images/screen4.png)
+
+### Generating UI
+When you navigate to an API, the browser builds a bespoke interface from the service's capabilities and your preferences.
+
+![Generating UI](images/screen3.png)
+
+### Repositories View
+A fully constructed interface for GitHub's API — summary cards, bulk actions, and a sortable data table, all shaped by your preferences.
+
+![Repositories View](images/screen2.png)
+
+### User Preferences
+YAML-based preferences control theme, density, default views, and interaction behavior. Organization preferences layer on top as guardrails.
+
+![User Preferences](images/screen1.png)
+
 ## Architecture
 
 - **Tauri v2** — Native shell with Rust backend. All API calls proxied through Rust for security.
