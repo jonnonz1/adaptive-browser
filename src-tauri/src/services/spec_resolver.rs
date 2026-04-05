@@ -14,7 +14,7 @@ pub async fn resolve_manifest(domain: &str) -> Result<UiManifest, Box<dyn std::e
     // let manifest: UiManifest = response.json().await?;
 
     Err(format!(
-        "No manifest found for '{}'. Try: api.github.com or demo.pulse.dev",
+        "No manifest found for '{}'. Try: api.github.com, news.ycombinator.com, or demo.pulse.dev",
         domain
     ).into())
 }
@@ -22,8 +22,161 @@ pub async fn resolve_manifest(domain: &str) -> Result<UiManifest, Box<dyn std::e
 fn get_bundled_manifest(domain: &str) -> Option<UiManifest> {
     match domain {
         "api.github.com" => Some(github_manifest()),
+        "news.ycombinator.com" | "hackernews" | "hn" => Some(hn_manifest()),
         "demo.pulse.dev" | "demo" | "pulse" => Some(demo_manifest()),
         _ => None,
+    }
+}
+
+fn hn_manifest() -> UiManifest {
+    UiManifest {
+        version: "1.0".into(),
+        service: ServiceInfo {
+            name: "Hacker News".into(),
+            description: "Technology news and discussion community".into(),
+            icon: Some("https://news.ycombinator.com/y18.svg".into()),
+            domain: "news.ycombinator.com".into(),
+            documentation: Some("https://github.com/HackerNews/API".into()),
+        },
+        openapi: None,
+        auth: None,
+        capabilities: vec![
+            UiCapability {
+                id: "top".into(),
+                name: "Top Stories".into(),
+                description: "Highest-ranked stories on Hacker News right now".into(),
+                category: "feed".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "topstories".into(),
+                    path: "/topstories".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "story".into(),
+                    default_view: Some("table".into()),
+                    alternate_views: Some(vec!["cards".into(), "list".into()]),
+                    sortable_fields: Some(vec!["score".into(), "time".into(), "descendants".into()]),
+                    groupable_fields: None,
+                    searchable: Some(true),
+                    primary_action: Some("navigate".into()),
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "new".into(),
+                name: "New Stories".into(),
+                description: "Most recently submitted stories".into(),
+                category: "feed".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "newstories".into(),
+                    path: "/newstories".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "story".into(),
+                    default_view: Some("table".into()),
+                    alternate_views: Some(vec!["cards".into()]),
+                    sortable_fields: Some(vec!["time".into(), "score".into()]),
+                    groupable_fields: None,
+                    searchable: Some(true),
+                    primary_action: Some("navigate".into()),
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "best".into(),
+                name: "Best Stories".into(),
+                description: "Highest-voted stories of all time".into(),
+                category: "feed".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "beststories".into(),
+                    path: "/beststories".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "story".into(),
+                    default_view: Some("table".into()),
+                    alternate_views: Some(vec!["cards".into()]),
+                    sortable_fields: Some(vec!["score".into(), "descendants".into()]),
+                    groupable_fields: None,
+                    searchable: Some(true),
+                    primary_action: Some("navigate".into()),
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "ask".into(),
+                name: "Ask HN".into(),
+                description: "Questions and discussions from the community".into(),
+                category: "discussion".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "askstories".into(),
+                    path: "/askstories".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "story".into(),
+                    default_view: Some("cards".into()),
+                    alternate_views: Some(vec!["table".into()]),
+                    sortable_fields: Some(vec!["score".into(), "descendants".into(), "time".into()]),
+                    groupable_fields: None,
+                    searchable: Some(true),
+                    primary_action: Some("navigate".into()),
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "show".into(),
+                name: "Show HN".into(),
+                description: "Projects and creations shared by the community".into(),
+                category: "showcase".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "showstories".into(),
+                    path: "/showstories".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "story".into(),
+                    default_view: Some("cards".into()),
+                    alternate_views: Some(vec!["table".into()]),
+                    sortable_fields: Some(vec!["score".into(), "time".into()]),
+                    groupable_fields: None,
+                    searchable: Some(true),
+                    primary_action: Some("navigate".into()),
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+            UiCapability {
+                id: "jobs".into(),
+                name: "Jobs".into(),
+                description: "YC startup job postings".into(),
+                category: "jobs".into(),
+                endpoints: vec![CapabilityEndpoint {
+                    operation_id: "jobstories".into(),
+                    path: "/jobstories".into(),
+                    method: "GET".into(),
+                    semantic: "list".into(),
+                    entity: "job".into(),
+                    default_view: Some("cards".into()),
+                    alternate_views: Some(vec!["table".into()]),
+                    sortable_fields: Some(vec!["time".into()]),
+                    groupable_fields: None,
+                    searchable: Some(true),
+                    primary_action: Some("navigate".into()),
+                    actions: None,
+                    related_capabilities: None,
+                }],
+            },
+        ],
+        navigation: Some(NavigationConfig {
+            primary: vec!["top".into(), "new".into(), "best".into()],
+            secondary: Some(vec!["ask".into(), "show".into(), "jobs".into()]),
+        }),
+        branding: Some(BrandingConfig {
+            primary_color: Some("#ff6600".into()),
+            accent_color: Some("#ff6600".into()),
+            logo: Some("https://news.ycombinator.com/y18.svg".into()),
+        }),
     }
 }
 

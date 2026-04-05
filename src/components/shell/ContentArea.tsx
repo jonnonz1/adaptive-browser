@@ -69,12 +69,13 @@ function Welcome() {
         <div className="mt-8 space-y-2 text-left">
           <SvcCard domain="demo.pulse.dev" desc="Analytics dashboard demo — no API key needed!" ready featured />
           <SvcCard domain="api.github.com" desc="Repositories, issues, pull requests" ready />
+          <SvcCard domain="news.ycombinator.com" desc="Top stories, new, best, Ask/Show HN, jobs" ready />
           <SvcCard domain="api.stripe.com" desc="Billing, subscriptions, payments" />
           <SvcCard domain="api.linear.app" desc="Issues, projects, cycles" />
         </div>
 
         <p className="mt-8 text-xs text-muted-foreground">
-          Try <code className="rounded bg-muted px-1 py-0.5 text-primary">demo.pulse.dev</code> for an instant demo, or set your GitHub PAT and LLM key via the status bar.
+          Try <code className="rounded bg-muted px-1 py-0.5 text-primary">demo.pulse.dev</code> for a demo, <code className="rounded bg-muted px-1 py-0.5 text-primary">news.ycombinator.com</code> for live HN data, or set your GitHub PAT and LLM key for full adaptive rendering.
         </p>
       </div>
     </div>
